@@ -17,10 +17,11 @@ import org.hl7.fhir.r4.model.Patient;
 import java.util.List;
 import java.util.Optional;
 
-public class PatientListAdapter extends RecyclerView.Adapter<PatientListAdapter.ViewHolder>{
+public class PatientListAdapter extends RecyclerView.Adapter<PatientListAdapter.ViewHolder> {
 
     private final Context context;
     private final List<Bundle.BundleEntryComponent> patientList;
+    private ItemClickListener itemClickListener;
 
     public PatientListAdapter(Context context, List<Bundle.BundleEntryComponent> patients) {
         this.context = context;
@@ -48,7 +49,8 @@ public class PatientListAdapter extends RecyclerView.Adapter<PatientListAdapter.
             StringBuilder nameBuilder = new StringBuilder(familyName);
             givenName.ifPresent(given -> nameBuilder.append(" ").append(given));
 
-            holder.textViewPatientName.setText(nameBuilder.toString());
+            holder.textViewPatientName.setText(nameBuilder.toString()
+                    .replaceAll("\\d", ""));
         }
     }
 
@@ -57,19 +59,46 @@ public class PatientListAdapter extends RecyclerView.Adapter<PatientListAdapter.
         return patientList.size();
     }
 
+    public String getPatientId(int position) {
+        Bundle.BundleEntryComponent item = patientList.get(position);
+        String patientId = null;
+
+        if (item != null) {
+            Patient patient = (Patient) item.getResource();
+            patientId = patient.getIdElement().getIdPart();
+        }
+
+        return patientId;
+    }
+
     public void updateData(List<Bundle.BundleEntryComponent> newPatientList) {
         patientList.clear();
         patientList.addAll(newPatientList);
         notifyDataSetChanged();
     }
 
-    public static class ViewHolder extends RecyclerView.ViewHolder {
-
+    public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         TextView textViewPatientName;
 
         ViewHolder(View itemView) {
             super(itemView);
             textViewPatientName = itemView.findViewById(R.id.textViewPatientName);
+            itemView.setOnClickListener(this);
         }
+
+        @Override
+        public void onClick(View view) {
+            if (itemClickListener != null) {
+                itemClickListener.onItemClick(view, getAdapterPosition());
+            }
+        }
+    }
+
+    public void setClickListener(ItemClickListener itemClickListener) {
+        this.itemClickListener = itemClickListener;
+    }
+
+    public interface ItemClickListener {
+        void onItemClick(View view, int position);
     }
 }

@@ -4,9 +4,9 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.AdapterView;
 import android.widget.SearchView;
 
 import com.example.patientcard.R;
@@ -17,8 +17,9 @@ import org.hl7.fhir.r4.model.Patient;
 
 import java.util.ArrayList;
 
-public class MainActivity extends AppCompatActivity implements SearchView.OnQueryTextListener, AdapterView.OnItemClickListener {
+public class MainActivity extends AppCompatActivity implements SearchView.OnQueryTextListener, PatientListAdapter.ItemClickListener {
 
+    public static final String PATIENT_ID_MESSAGE = "patientIdMessage";
     PatientListAdapter patientListAdapter;
 
     @Override
@@ -32,12 +33,15 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
         RecyclerView recyclerViewPatientList = findViewById(R.id.recyclerViewPatientList);
         recyclerViewPatientList.setLayoutManager(new LinearLayoutManager(this));
         patientListAdapter = new PatientListAdapter(this, new ArrayList<>());
+        patientListAdapter.setClickListener(this);
         recyclerViewPatientList.setAdapter(patientListAdapter);
     }
 
     @Override
-    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        //TODO
+    public void onItemClick(View view, int position) {
+        Intent intent = new Intent(this, PatientActivity.class);
+        intent.putExtra(PATIENT_ID_MESSAGE, patientListAdapter.getPatientId(position));
+        startActivity(intent);
     }
 
     @Override

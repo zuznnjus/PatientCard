@@ -12,7 +12,7 @@ import ca.uhn.fhir.rest.client.api.IGenericClient;
 
 public class RestClient {
     private static final String TAG = "REST CLIENT";
-    public static final String BASE_URL = "http://localhost:8080/baseR4";
+    private static final String BASE_URL = "http://localhost:8080/baseR4";
     private static IGenericClient iGenericClient;
     private static FhirContext fhirContext;
 

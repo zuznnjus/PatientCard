@@ -49,7 +49,8 @@ public class PatientListAdapter extends RecyclerView.Adapter<PatientListAdapter.
             StringBuilder nameBuilder = new StringBuilder(familyName);
             givenName.ifPresent(given -> nameBuilder.append(" ").append(given));
 
-            holder.textViewPatientName.setText(nameBuilder.toString());
+            holder.textViewPatientName.setText(nameBuilder.toString()
+                    .replaceAll("\\d", ""));
         }
     }
 

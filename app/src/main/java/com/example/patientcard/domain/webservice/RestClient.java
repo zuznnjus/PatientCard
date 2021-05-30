@@ -1,19 +1,18 @@
 package com.example.patientcard.domain.webservice;
 
-import android.content.Context;
 import android.util.Log;
 
-import com.google.common.collect.ImmutableMap;
-
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 
 public class RestClient {
     private static final String TAG = "REST CLIENT";
-    private static final String BASE_URL = "http://192.168.1.10:8080/baseR4";
+    private static final String BASE_URL = "http://localhost:8080/baseR4";
     private static IGenericClient iGenericClient;
     private static FhirContext fhirContext;
 
@@ -41,10 +40,12 @@ public class RestClient {
 
     private static Map<String, String> getProxyDetails() {
         try {
-            return ImmutableMap.<String, String>builder()
-                    .put("server", System.getProperty("http.proxyHost"))
-                    .put("port", System.getProperty("http.proxyPort"))
-                    .build();
+            Map<String, String> proxyParams = new HashMap<>();
+            Optional<String> server = Optional.ofNullable(System.getProperty("http.proxyHost"));
+            Optional<String> port = Optional.ofNullable(System.getProperty("http.proxyPort"));
+            server.ifPresent(serverValue -> proxyParams.put("server", serverValue));
+            port.ifPresent(portValue -> proxyParams.put("port", portValue));
+            return proxyParams;
         } catch (Exception ex) {
             Log.e(TAG, ex.getMessage());
         }

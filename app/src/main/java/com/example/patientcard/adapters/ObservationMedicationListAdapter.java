@@ -67,25 +67,8 @@ public class ObservationMedicationListAdapter extends RecyclerView.Adapter<Obser
 
     public void updateData(List<Resource> newObservationList) {
         patientObservationList.clear();
-        patientObservationList.addAll(getSortedResources(newObservationList));
+        patientObservationList.addAll(newObservationList);
         notifyDataSetChanged();
-    }
-
-    private List<Resource> getSortedResources(List<Resource> resources) {
-        return resources.stream()
-                .sorted(Comparator.comparing(this::getResourceSortingKey))
-                .collect(Collectors.toList());
-    }
-
-    private Date getResourceSortingKey(Resource resource) {
-        if (resource instanceof Observation) {
-            Observation observation = (Observation) resource;
-            return observation.getIssued();
-        } else if (resource instanceof MedicationRequest) {
-            MedicationRequest medicationRequest = (MedicationRequest) resource;
-            return medicationRequest.getAuthoredOn();
-        }
-        return Calendar.getInstance().getTime();
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {

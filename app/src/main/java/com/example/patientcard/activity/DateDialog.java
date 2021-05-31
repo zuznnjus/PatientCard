@@ -42,4 +42,8 @@ public class DateDialog implements View.OnClickListener, DatePickerDialog.OnDate
                 date.getDayOfMonth())
                 .show();
     }
+
+    public EditText getEditText() {
+        return editText;
+    }
 }

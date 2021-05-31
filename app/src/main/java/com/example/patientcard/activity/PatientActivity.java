@@ -2,6 +2,8 @@ package com.example.patientcard.activity;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -13,6 +15,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.patientcard.R;
 import com.example.patientcard.adapters.ObservationMedicationListAdapter;
 import com.example.patientcard.domain.control.HapiFhirHandler;
+import com.example.patientcard.domain.control.PatientDataHandler;
 
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Resource;
@@ -31,7 +34,7 @@ public class PatientActivity extends AppCompatActivity implements ObservationMed
 
     private DateDialog beginDate;
     private DateDialog endDate;
-    private Patient patient;
+    private PatientDataHandler patientDataHandler;
     private ObservationMedicationListAdapter observationMedicationListAdapter;
 
     @Override
@@ -52,6 +55,8 @@ public class PatientActivity extends AppCompatActivity implements ObservationMed
         EditText editEndDate = findViewById(R.id.editTextEndDate);
         beginDate = new DateDialog(this, editStartDate);
         endDate = new DateDialog(this, editEndDate);
+        editStartDate.addTextChangedListener(createTextListener());
+        editEndDate.addTextChangedListener(createTextListener());
 
         setObservationMedicationListAdapter(patientId);
     }
@@ -61,6 +66,23 @@ public class PatientActivity extends AppCompatActivity implements ObservationMed
 
     }
 
+    private TextWatcher createTextListener() {
+        return new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                getFilteredResourcesThread().start();
+            }
+        };
+    }
+
     private void setObservationMedicationListAdapter(String patientId) {
         RecyclerView recyclerViewObservationMedication = findViewById(R.id.recyclerViewObservationMedication);
         recyclerViewObservationMedication.setLayoutManager(new LinearLayoutManager(this));
@@ -68,13 +90,15 @@ public class PatientActivity extends AppCompatActivity implements ObservationMed
         observationMedicationListAdapter.setClickListener(this);
         recyclerViewObservationMedication.setAdapter(observationMedicationListAdapter);
 
-        createGetPatientThread(patientId).start();
+        getPatientThread(patientId).start();
     }
 
-    private Thread createGetPatientThread(String patientId) {
+    private Thread getPatientThread(String patientId) {
         return new Thread(() -> {
-            patient = hapiFhirHandler.getPatientById(patientId);
-            createGetPatientObservationMedicationThread(patient).start();
+            Patient patient = hapiFhirHandler.getPatientById(patientId);
+            patientDataHandler = new PatientDataHandler(patient, hapiFhirHandler);
+            getPatientResourcesThread().start();
+
             runOnUiThread(() -> {
                 name.setText(patient.getName().get(0).getNameAsSingleString()
                         .replaceAll("\\d", ""));
@@ -85,11 +109,19 @@ public class PatientActivity extends AppCompatActivity implements ObservationMed
         });
     }
 
-    private Thread createGetPatientObservationMedicationThread(Patient patient) {
+    private Thread getPatientResourcesThread() {
         return new Thread(() -> {
-            List<Resource> observationsMedicationRequests = hapiFhirHandler.getObservations(patient);
-            observationsMedicationRequests.addAll(hapiFhirHandler.getMedicationRequests(patient));
-            runOnUiThread(() -> observationMedicationListAdapter.updateData(observationsMedicationRequests));
+            patientDataHandler.loadPatientResources();
+            runOnUiThread(() -> observationMedicationListAdapter.updateData(patientDataHandler.getPatientResources()));
+        });
+    }
+
+    private Thread getFilteredResourcesThread() {
+        return new Thread(() -> {
+            String beginDateString = beginDate.getEditText().getText().toString();
+            String endDateString = endDate.getEditText().getText().toString();
+            List<Resource> filteredResources = patientDataHandler.getResourcesBetweenGivenDates(beginDateString, endDateString);
+            runOnUiThread(() -> observationMedicationListAdapter.updateData(filteredResources));
         });
     }
 }

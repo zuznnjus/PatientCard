@@ -14,8 +14,8 @@ import com.example.patientcard.R;
 import com.example.patientcard.adapters.ObservationMedicationListAdapter;
 import com.example.patientcard.domain.control.HapiFhirHandler;
 
-import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Resource;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -87,8 +87,9 @@ public class PatientActivity extends AppCompatActivity implements ObservationMed
 
     private Thread createGetPatientObservationMedicationThread(Patient patient) {
         return new Thread(() -> {
-            List<Observation> observations = hapiFhirHandler.getObservations(patient);
-            runOnUiThread(() -> observationMedicationListAdapter.updateData(observations));
+            List<Resource> observationsMedicationRequests = hapiFhirHandler.getObservations(patient);
+            observationsMedicationRequests.addAll(hapiFhirHandler.getMedicationRequests(patient));
+            runOnUiThread(() -> observationMedicationListAdapter.updateData(observationsMedicationRequests));
         });
     }
 }

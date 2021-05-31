@@ -3,8 +3,10 @@ package com.example.patientcard.domain.control;
 import com.example.patientcard.domain.webservice.RestClient;
 
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.MedicationRequest;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Resource;
 
 import java.io.Serializable;
 import java.util.Comparator;
@@ -54,7 +56,7 @@ public class HapiFhirHandler implements Serializable {
                 .execute();
     }
 
-    public List<Observation> getObservations(Patient patient) {
+    public List<Resource> getObservations(Patient patient) {
         Bundle bundle = RestClient.getGenericClient()
                 .search()
                 .forResource(Observation.class)
@@ -65,7 +67,20 @@ public class HapiFhirHandler implements Serializable {
                 .map(Bundle.BundleEntryComponent::getResource)
                 .filter(Observation.class::isInstance)
                 .map(Observation.class::cast)
-                .sorted(Comparator.comparing(Observation::getIssued))
+                .collect(Collectors.toList());
+    }
+
+    public List<Resource> getMedicationRequests(Patient patient) {
+        Bundle bundle = RestClient.getGenericClient()
+                .search()
+                .forResource(MedicationRequest.class)
+                .where(MedicationRequest.SUBJECT.hasId(patient.getIdElement().getIdPart()))
+                .returnBundle(Bundle.class)
+                .execute();
+        return getPagedEntries(bundle).stream()
+                .map(Bundle.BundleEntryComponent::getResource)
+                .filter(MedicationRequest.class::isInstance)
+                .map(MedicationRequest.class::cast)
                 .collect(Collectors.toList());
     }
 

@@ -11,14 +11,18 @@ import android.widget.SearchView;
 
 import com.example.patientcard.R;
 import com.example.patientcard.adapters.PatientListAdapter;
-import com.example.patientcard.domain.webservice.RestClient;
+import com.example.patientcard.domain.control.HapiFhirHandler;
 
 import org.hl7.fhir.r4.model.Patient;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements SearchView.OnQueryTextListener, PatientListAdapter.ItemClickListener {
 
+    HapiFhirHandler hapiFhirHandler = new HapiFhirHandler();
+
+    public static final String HAPI_FHIR_HANDLER_MESSAGE = "hapiFhirHandlerMessage";
     public static final String PATIENT_ID_MESSAGE = "patientIdMessage";
     PatientListAdapter patientListAdapter;
 
@@ -30,17 +34,14 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
         SearchView patientSearchView = findViewById(R.id.searchViewPatientName);
         patientSearchView.setOnQueryTextListener(this);
 
-        RecyclerView recyclerViewPatientList = findViewById(R.id.recyclerViewPatientList);
-        recyclerViewPatientList.setLayoutManager(new LinearLayoutManager(this));
-        patientListAdapter = new PatientListAdapter(this, new ArrayList<>());
-        patientListAdapter.setClickListener(this);
-        recyclerViewPatientList.setAdapter(patientListAdapter);
+        setPatientListAdapter();
     }
 
     @Override
     public void onItemClick(View view, int position) {
         Intent intent = new Intent(this, PatientActivity.class);
         intent.putExtra(PATIENT_ID_MESSAGE, patientListAdapter.getPatientId(position));
+        intent.putExtra(HAPI_FHIR_HANDLER_MESSAGE, hapiFhirHandler);
         startActivity(intent);
     }
 
@@ -53,25 +54,32 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
     public boolean onQueryTextChange(String newText) {
         if (newText.length() > 0) {
             createSearchPatientsThread(newText).start();
+        } else {
+            createAllPatientsThread().start();
         }
         return false;
     }
 
-    private Thread createSearchPatientsThread(String searchName) {
+    private void setPatientListAdapter() {
+        RecyclerView recyclerViewPatientList = findViewById(R.id.recyclerViewPatientList);
+        recyclerViewPatientList.setLayoutManager(new LinearLayoutManager(this));
+        patientListAdapter = new PatientListAdapter(this, new ArrayList<>());
+        patientListAdapter.setClickListener(this);
+        recyclerViewPatientList.setAdapter(patientListAdapter);
+        createAllPatientsThread().start();
+    }
+
+    private Thread createAllPatientsThread() {
         return new Thread(() -> {
-            org.hl7.fhir.r4.model.Bundle results = getSearchResult(searchName);
-            runOnUiThread(() -> patientListAdapter.updateData(results.getEntry()));
+            List<Patient> results = hapiFhirHandler.getAllPatients();
+            runOnUiThread(() -> patientListAdapter.updateData(results));
         });
     }
 
-    private org.hl7.fhir.r4.model.Bundle getSearchResult(String searchName) {
-        return (org.hl7.fhir.r4.model.Bundle) RestClient
-                .getGenericClient()
-                .search()
-                .forResource(Patient.class)
-                .count(100)
-                .where(Patient.FAMILY.matches().value(searchName))
-                .encodedJson()
-                .execute();
+    private Thread createSearchPatientsThread(String searchName) {
+        return new Thread(() -> {
+            List<Patient> patients = hapiFhirHandler.getSearchedPatients(searchName);
+            runOnUiThread(() -> patientListAdapter.updateData(patients));
+        });
     }
 }

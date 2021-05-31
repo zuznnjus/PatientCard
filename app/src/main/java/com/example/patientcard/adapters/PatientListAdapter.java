@@ -11,7 +11,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.patientcard.R;
 
-import org.hl7.fhir.r4.model.Bundle;
+import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.r4.model.Patient;
 
 import java.util.List;
@@ -20,10 +20,10 @@ import java.util.Optional;
 public class PatientListAdapter extends RecyclerView.Adapter<PatientListAdapter.ViewHolder> {
 
     private final Context context;
-    private final List<Bundle.BundleEntryComponent> patientList;
+    private final List<Patient> patientList;
     private ItemClickListener itemClickListener;
 
-    public PatientListAdapter(Context context, List<Bundle.BundleEntryComponent> patients) {
+    public PatientListAdapter(Context context, List<Patient> patients) {
         this.context = context;
         this.patientList = patients;
     }
@@ -37,9 +37,8 @@ public class PatientListAdapter extends RecyclerView.Adapter<PatientListAdapter.
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        Bundle.BundleEntryComponent item = patientList.get(position);
-        if (item != null) {
-            Patient patient = (Patient) item.getResource();
+        Patient patient = patientList.get(position);
+        if (patient != null) {
             String familyName = patient.getName().get(0).getFamily();
             Optional<String> givenName = Optional.empty();
             if (patient.getName().get(0).getGiven().size() > 0) {
@@ -60,18 +59,14 @@ public class PatientListAdapter extends RecyclerView.Adapter<PatientListAdapter.
     }
 
     public String getPatientId(int position) {
-        Bundle.BundleEntryComponent item = patientList.get(position);
-        String patientId = null;
-
-        if (item != null) {
-            Patient patient = (Patient) item.getResource();
-            patientId = patient.getIdElement().getIdPart();
+        Patient patient = patientList.get(position);
+        if (patient != null) {
+            return patient.getIdElement().getIdPart();
         }
-
-        return patientId;
+        return StringUtils.EMPTY;
     }
 
-    public void updateData(List<Bundle.BundleEntryComponent> newPatientList) {
+    public void updateData(List<Patient> newPatientList) {
         patientList.clear();
         patientList.addAll(newPatientList);
         notifyDataSetChanged();

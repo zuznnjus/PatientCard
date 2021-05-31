@@ -1,42 +1,47 @@
 package com.example.patientcard.activity;
 
-import android.app.DatePickerDialog;
 import android.content.Intent;
-import android.icu.util.Calendar;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.patientcard.R;
-import com.example.patientcard.domain.webservice.RestClient;
+import com.example.patientcard.adapters.ObservationMedicationListAdapter;
+import com.example.patientcard.domain.control.HapiFhirHandler;
 
+import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
 
-import java.text.SimpleDateFormat;
-import java.util.Locale;
+import java.util.ArrayList;
+import java.util.List;
 
-public class PatientActivity extends AppCompatActivity {
-    private final Calendar calendar = Calendar.getInstance();
-    private final String format = "dd/MM/yyyy";
-    private final SimpleDateFormat dateFormat = new SimpleDateFormat(format, Locale.getDefault());
+public class PatientActivity extends AppCompatActivity implements ObservationMedicationListAdapter.ItemClickListener {
 
-    private EditText clickedDate;
+    private HapiFhirHandler hapiFhirHandler;
+
     private TextView name;
     private TextView gender;
     private TextView birthDate;
     private TextView identifier;
 
+    private DateDialog beginDate;
+    private DateDialog endDate;
     private Patient patient;
+    private ObservationMedicationListAdapter observationMedicationListAdapter;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) { // trochę duży ten onCreate, ale na pewno jakoś ładnie go zrobisz
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_patient);
 
         Intent intent = getIntent();
         String patientId = intent.getStringExtra(MainActivity.PATIENT_ID_MESSAGE);
+        hapiFhirHandler = (HapiFhirHandler) intent.getSerializableExtra(MainActivity.HAPI_FHIR_HANDLER_MESSAGE);
 
         name = findViewById(R.id.textViewPatientName);
         gender = findViewById(R.id.textViewGender);
@@ -45,41 +50,31 @@ public class PatientActivity extends AppCompatActivity {
 
         EditText editStartDate = findViewById(R.id.editTextStartDate);
         EditText editEndDate = findViewById(R.id.editTextEndDate);
-        editEndDate.setText(dateFormat.format(calendar.getTime()));
-        calendar.add(Calendar.YEAR, -1); // tak, jestem bardzo dumna z tego XDD
-        editStartDate.setText(dateFormat.format(calendar.getTime()));
+        beginDate = new DateDialog(this, editStartDate);
+        endDate = new DateDialog(this, editEndDate);
 
-        DatePickerDialog.OnDateSetListener date = (view, year, monthOfYear, dayOfMonth) -> {
-            calendar.set(Calendar.YEAR, year);
-            calendar.set(Calendar.MONTH, monthOfYear);
-            calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
-            updateDate(clickedDate);
-        };
+        setObservationMedicationListAdapter(patientId);
+    }
 
-        editStartDate.setOnClickListener(view -> {
-            clickedDate = (EditText) view;
-            new DatePickerDialog(PatientActivity.this, date, calendar
-                    .get(Calendar.YEAR), calendar.get(Calendar.MONTH),
-                    calendar.get(Calendar.DAY_OF_MONTH)).show();
-        });
+    @Override
+    public void onItemClick(View view, int position) {
 
-        editEndDate.setOnClickListener(view -> {
-            clickedDate = (EditText) view;
-            new DatePickerDialog(PatientActivity.this,
-                    date, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH),
-                    calendar.get(Calendar.DAY_OF_MONTH)).show();
-        });
+    }
+
+    private void setObservationMedicationListAdapter(String patientId) {
+        RecyclerView recyclerViewObservationMedication = findViewById(R.id.recyclerViewObservationMedication);
+        recyclerViewObservationMedication.setLayoutManager(new LinearLayoutManager(this));
+        observationMedicationListAdapter = new ObservationMedicationListAdapter(this, new ArrayList<>());
+        observationMedicationListAdapter.setClickListener(this);
+        recyclerViewObservationMedication.setAdapter(observationMedicationListAdapter);
 
         createGetPatientThread(patientId).start();
     }
 
-    private void updateDate(EditText editText) {
-        editText.setText(dateFormat.format(calendar.getTime()));
-    }
-
     private Thread createGetPatientThread(String patientId) {
         return new Thread(() -> {
-            patient = getPatient(patientId);
+            patient = hapiFhirHandler.getPatientById(patientId);
+            createGetPatientObservationMedicationThread(patient).start();
             runOnUiThread(() -> {
                 name.setText(patient.getName().get(0).getNameAsSingleString()
                         .replaceAll("\\d", ""));
@@ -90,12 +85,10 @@ public class PatientActivity extends AppCompatActivity {
         });
     }
 
-    private Patient getPatient(String patientId) {
-        return (Patient) RestClient
-                .getGenericClient()
-                .read()
-                .resource(Patient.class)
-                .withId(patientId)
-                .execute();
+    private Thread createGetPatientObservationMedicationThread(Patient patient) {
+        return new Thread(() -> {
+            List<Observation> observations = hapiFhirHandler.getObservations(patient);
+            runOnUiThread(() -> observationMedicationListAdapter.updateData(observations));
+        });
     }
 }

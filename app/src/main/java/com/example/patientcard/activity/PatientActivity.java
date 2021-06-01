@@ -2,43 +2,28 @@ package com.example.patientcard.activity;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.text.Editable;
-import android.text.TextWatcher;
-import android.view.View;
-import android.widget.EditText;
-import android.widget.TextView;
 
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
+import androidx.viewpager2.widget.ViewPager2;
 
 import com.example.patientcard.R;
-import com.example.patientcard.adapters.ObservationMedicationListAdapter;
+import com.example.patientcard.adapters.PatientPagerAdapter;
 import com.example.patientcard.domain.control.HapiFhirHandler;
 import com.example.patientcard.domain.control.PatientDataHandler;
+import com.google.android.material.tabs.TabLayout;
+import com.google.android.material.tabs.TabLayoutMediator;
 
 import org.hl7.fhir.r4.model.Patient;
-import org.hl7.fhir.r4.model.Resource;
 
-import java.util.ArrayList;
-import java.util.List;
+public class PatientActivity extends AppCompatActivity {
 
-public class PatientActivity extends AppCompatActivity implements ObservationMedicationListAdapter.ItemClickListener {
-
+    private static final String[] TAB_NAMES = new String[] {"PATIENT", "OBSERVATIONS / MEDICATION REQUESTS"};
     private HapiFhirHandler hapiFhirHandler;
-
-    private TextView name;
-    private TextView gender;
-    private TextView birthDate;
-    private TextView identifier;
-
-    private DateDialog beginDate;
-    private DateDialog endDate;
     private PatientDataHandler patientDataHandler;
-    private ObservationMedicationListAdapter observationMedicationListAdapter;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_patient);
 
@@ -46,82 +31,21 @@ public class PatientActivity extends AppCompatActivity implements ObservationMed
         String patientId = intent.getStringExtra(MainActivity.PATIENT_ID_MESSAGE);
         hapiFhirHandler = (HapiFhirHandler) intent.getSerializableExtra(MainActivity.HAPI_FHIR_HANDLER_MESSAGE);
 
-        name = findViewById(R.id.textViewPatientName);
-        gender = findViewById(R.id.textViewGender);
-        birthDate = findViewById(R.id.textViewBirthDate);
-        identifier = findViewById(R.id.textViewIdentifier);
-
-        EditText editStartDate = findViewById(R.id.editTextStartDate);
-        EditText editEndDate = findViewById(R.id.editTextEndDate);
-        beginDate = new DateDialog(this, editStartDate);
-        endDate = new DateDialog(this, editEndDate);
-        editStartDate.addTextChangedListener(createTextListener());
-        editEndDate.addTextChangedListener(createTextListener());
-
-        setObservationMedicationListAdapter(patientId);
+        init(patientId);
     }
 
-    @Override
-    public void onItemClick(View view, int position) {
-
-    }
-
-    private TextWatcher createTextListener() {
-        return new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-                getFilteredResourcesThread().start();
-            }
-        };
-    }
-
-    private void setObservationMedicationListAdapter(String patientId) {
-        RecyclerView recyclerViewObservationMedication = findViewById(R.id.recyclerViewObservationMedication);
-        recyclerViewObservationMedication.setLayoutManager(new LinearLayoutManager(this));
-        observationMedicationListAdapter = new ObservationMedicationListAdapter(this, new ArrayList<>());
-        observationMedicationListAdapter.setClickListener(this);
-        recyclerViewObservationMedication.setAdapter(observationMedicationListAdapter);
-
-        getPatientThread(patientId).start();
-    }
-
-    private Thread getPatientThread(String patientId) {
-        return new Thread(() -> {
+    private void init(String patientId) {
+        new Thread(() -> {
             Patient patient = hapiFhirHandler.getPatientById(patientId);
             patientDataHandler = new PatientDataHandler(patient, hapiFhirHandler);
-            getPatientResourcesThread().start();
-
-            runOnUiThread(() -> {
-                name.setText(patient.getName().get(0).getNameAsSingleString()
-                        .replaceAll("\\d", ""));
-                gender.setText(patient.getGender().toString());
-                birthDate.setText(patient.getBirthDateElement().asStringValue());
-                identifier.setText(patient.getIdElement().getIdPart());
-            });
-        });
-    }
-
-    private Thread getPatientResourcesThread() {
-        return new Thread(() -> {
             patientDataHandler.loadPatientResources();
-            runOnUiThread(() -> observationMedicationListAdapter.updateData(patientDataHandler.getPatientResources()));
-        });
-    }
-
-    private Thread getFilteredResourcesThread() {
-        return new Thread(() -> {
-            String beginDateString = beginDate.getEditText().getText().toString();
-            String endDateString = endDate.getEditText().getText().toString();
-            List<Resource> filteredResources = patientDataHandler.getResourcesBetweenGivenDates(beginDateString, endDateString);
-            runOnUiThread(() -> observationMedicationListAdapter.updateData(filteredResources));
-        });
+            runOnUiThread(() -> {
+                TabLayout tabLayout = findViewById(R.id.tabLayout);
+                ViewPager2 viewPager = findViewById(R.id.viewPager);
+                PatientPagerAdapter adapter = new PatientPagerAdapter(this, patientDataHandler);
+                viewPager.setAdapter(adapter);
+                new TabLayoutMediator(tabLayout, viewPager, (tab, position) -> tab.setText(TAB_NAMES[position])).attach();
+            });
+        }).start();
     }
 }

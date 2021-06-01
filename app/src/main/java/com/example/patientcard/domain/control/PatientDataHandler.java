@@ -26,6 +26,10 @@ public class PatientDataHandler {
         this.hapiFhirHandler = hapiFhirHandler;
     }
 
+    public Patient getPatient() {
+        return patient;
+    }
+
     public List<Resource> getPatientResources() {
         return patientResources;
     }

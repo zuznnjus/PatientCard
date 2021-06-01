@@ -18,6 +18,8 @@ import org.hl7.fhir.r4.model.Patient;
 
 public class PatientActivity extends AppCompatActivity {
 
+    public static final String OBSERVATION_ID_MESSAGE = "observationIdMessage";
+    public static final String MEDICATION_ID_MESSAGE = "medicationIdMessage";
     private static final String[] TAB_NAMES = new String[] {"PATIENT", "OBSERVATIONS / MEDICATION REQUESTS"};
     private HapiFhirHandler hapiFhirHandler;
     private PatientDataHandler patientDataHandler;

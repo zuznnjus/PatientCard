@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
     android:padding="10dp"
-    android:orientation="vertical">
+    tools:context=".activity.PatientResourceActivity">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -11,16 +13,15 @@
         android:orientation="horizontal">
 
         <TextView
-            android:id="@+id/textViewPatientNameLabel"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="2"
             android:padding="5dp"
-            android:text="Name:"
+            android:text="Id:"
             android:textSize="15sp" />
 
         <TextView
-            android:id="@+id/textViewPatientName"
+            android:id="@+id/textViewResourceId"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -36,16 +37,15 @@
         android:orientation="horizontal">
 
         <TextView
-            android:id="@+id/textViewGenderLabel"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="2"
             android:padding="5dp"
-            android:text="Gender:"
+            android:text="Type:"
             android:textSize="15sp" />
 
         <TextView
-            android:id="@+id/textViewGender"
+            android:id="@+id/textViewResourceType"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -61,16 +61,15 @@
         android:orientation="horizontal">
 
         <TextView
-            android:id="@+id/textViewBirthDateLabel"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="2"
             android:padding="5dp"
-            android:text="Birth date:"
+            android:text="Code:"
             android:textSize="15sp" />
 
         <TextView
-            android:id="@+id/textViewBirthDate"
+            android:id="@+id/textViewResourceCode"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -86,16 +85,15 @@
         android:orientation="horizontal">
 
         <TextView
-            android:id="@+id/textViewIdentifierLabel"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="2"
             android:padding="5dp"
-            android:text="Identifier:"
+            android:text="Date:"
             android:textSize="15sp" />
 
         <TextView
-            android:id="@+id/textViewIdentifier"
+            android:id="@+id/textViewResourceDate"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -104,5 +102,31 @@
             android:textSize="15sp" />
 
     </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="2"
+            android:padding="5dp"
+            android:text="Measurement value:"
+            android:textSize="15sp" />
+
+        <TextView
+            android:id="@+id/textViewResourceValueQuantity"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:padding="5dp"
+            android:text=""
+            android:textSize="15sp" />
+
+    </LinearLayout>
+
+
 
 </LinearLayout>

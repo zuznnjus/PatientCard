@@ -13,6 +13,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.PatientCard"
         android:usesCleartextTraffic="true">
+        <activity android:name=".activity.PatientResourceActivity" />
         <activity android:name=".activity.PatientActivity" />
         <activity android:name=".activity.MainActivity">
             <intent-filter>

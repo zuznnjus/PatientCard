@@ -6,7 +6,7 @@ import androidx.fragment.app.FragmentActivity;
 import androidx.viewpager2.adapter.FragmentStateAdapter;
 
 import com.example.patientcard.fragment.PatientDataFragment;
-import com.example.patientcard.domain.webservice.PatientResourcesFragment;
+import com.example.patientcard.fragment.PatientResourcesFragment;
 import com.example.patientcard.domain.control.PatientDataHandler;
 
 public class PatientPagerAdapter extends FragmentStateAdapter {

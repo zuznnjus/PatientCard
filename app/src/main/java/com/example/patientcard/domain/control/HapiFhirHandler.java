@@ -84,6 +84,14 @@ public class HapiFhirHandler implements Serializable {
                 .collect(Collectors.toList());
     }
 
+    public Resource getResourceById(String resourceId, Class<? extends Resource> resourceType) {
+        return RestClient.getGenericClient()
+                .read()
+                .resource(resourceType)
+                .withId(resourceId)
+                .execute();
+    }
+
     private List<Bundle.BundleEntryComponent> getPagedEntries(Bundle bundle) {
         List<Bundle.BundleEntryComponent> entries = bundle.getEntry();
         while (bundle.getLink(Bundle.LINK_NEXT) != null) {

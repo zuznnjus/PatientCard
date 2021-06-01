@@ -30,6 +30,10 @@ public class PatientDataHandler {
         return patient;
     }
 
+    public HapiFhirHandler getHapiFhirHandler() {
+        return hapiFhirHandler;
+    }
+
     public List<Resource> getPatientResources() {
         return patientResources;
     }
@@ -40,7 +44,13 @@ public class PatientDataHandler {
         patientResources.sort(Comparator.comparing(this::getResourceSortingKey));
     }
 
-    public List<Resource> getResourcesBetweenGivenDates(String begin, String end) {
+    public List<Resource> getFilteredResources(String begin, String end, boolean getObservation, boolean getMedication) {
+        if (StringUtils.isBlank(begin) && StringUtils.isBlank(end)) {
+            return patientResources.stream()
+                    .filter(resource -> isOfMatchingType(resource, getObservation, getMedication))
+                    .collect(Collectors.toList());
+        }
+
         LocalDate beginDate;
         LocalDate endDate;
 
@@ -56,6 +66,7 @@ public class PatientDataHandler {
         }
 
         return patientResources.stream()
+                .filter(resource -> isOfMatchingType(resource, getObservation, getMedication))
                 .filter(resource -> isBetweenGivenDates(resource, beginDate, endDate))
                 .collect(Collectors.toList());
     }
@@ -74,6 +85,11 @@ public class PatientDataHandler {
     private LocalDate parseStringToDate(String date) {
         String[] split = date.split("-");
         return LocalDate.of(Integer.parseInt(split[2]), Integer.parseInt(split[1]), Integer.parseInt(split[0]));
+    }
+
+    private boolean isOfMatchingType(Resource resource, boolean getObservation, boolean getMedication) {
+        return (resource instanceof Observation && getObservation)
+                || (resource instanceof MedicationRequest && getMedication);
     }
 
     private boolean isBetweenGivenDates(Resource resource, LocalDate beginDate, LocalDate endDate) {

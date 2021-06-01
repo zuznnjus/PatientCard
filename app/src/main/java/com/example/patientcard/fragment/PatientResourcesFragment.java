@@ -1,11 +1,13 @@
-package com.example.patientcard.domain.webservice;
+package com.example.patientcard.fragment;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CheckBox;
 import android.widget.EditText;
 
 import androidx.annotation.NonNull;
@@ -16,9 +18,14 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.patientcard.R;
 import com.example.patientcard.activity.DateDialog;
+import com.example.patientcard.activity.MainActivity;
+import com.example.patientcard.activity.PatientActivity;
+import com.example.patientcard.activity.PatientResourceActivity;
 import com.example.patientcard.adapters.ObservationMedicationListAdapter;
 import com.example.patientcard.domain.control.PatientDataHandler;
 
+import org.hl7.fhir.r4.model.MedicationRequest;
+import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Resource;
 
 import java.util.ArrayList;
@@ -29,6 +36,8 @@ public class PatientResourcesFragment extends Fragment implements ObservationMed
     private final PatientDataHandler patientDataHandler;
     private DateDialog beginDate;
     private DateDialog endDate;
+    private CheckBox checkBoxObservation;
+    private CheckBox checkBoxMedication;
     private ObservationMedicationListAdapter observationMedicationListAdapter;
 
     public PatientResourcesFragment(PatientDataHandler patientDataHandler) {
@@ -52,12 +61,29 @@ public class PatientResourcesFragment extends Fragment implements ObservationMed
         editStartDate.addTextChangedListener(createTextListener());
         editEndDate.addTextChangedListener(createTextListener());
 
+        checkBoxObservation = view.findViewById(R.id.checkBoxObservation);
+        checkBoxMedication = view.findViewById(R.id.checkBoxMedication);
+        checkBoxObservation.setOnCheckedChangeListener(
+                (buttonView, isChecked) -> getFilteredResourcesThread(isChecked, checkBoxMedication.isChecked()).start());
+        checkBoxMedication.setOnCheckedChangeListener(
+                (buttonView, isChecked) -> getFilteredResourcesThread(checkBoxObservation.isChecked(), isChecked).start());
+
         setObservationMedicationListAdapter(view);
     }
 
     @Override
     public void onItemClick(View view, int position) {
+        Resource resource = observationMedicationListAdapter.getResourceAtPosition(position);
+        String resourceId = resource.getIdElement().getIdPart();
 
+        Intent intent = new Intent(getContext(), PatientResourceActivity.class);
+        intent.putExtra(MainActivity.HAPI_FHIR_HANDLER_MESSAGE, patientDataHandler.getHapiFhirHandler());
+        if (resource instanceof Observation) {
+            intent.putExtra(PatientActivity.OBSERVATION_ID_MESSAGE, resourceId);
+        } else if (resource instanceof MedicationRequest) {
+            intent.putExtra(PatientActivity.MEDICATION_ID_MESSAGE, resourceId);
+        }
+        startActivity(intent);
     }
 
     private TextWatcher createTextListener() {
@@ -72,7 +98,7 @@ public class PatientResourcesFragment extends Fragment implements ObservationMed
 
             @Override
             public void afterTextChanged(Editable s) {
-                getFilteredResourcesThread().start();
+                getFilteredResourcesThread(checkBoxObservation.isChecked(), checkBoxMedication.isChecked()).start();
             }
         };
     }
@@ -86,11 +112,11 @@ public class PatientResourcesFragment extends Fragment implements ObservationMed
         observationMedicationListAdapter.updateData(patientDataHandler.getPatientResources());
     }
 
-    private Thread getFilteredResourcesThread() {
+    private Thread getFilteredResourcesThread(boolean getObservation, boolean getMedication) {
         return new Thread(() -> {
             String beginDateString = beginDate.getEditText().getText().toString();
             String endDateString = endDate.getEditText().getText().toString();
-            List<Resource> filteredResources = patientDataHandler.getResourcesBetweenGivenDates(beginDateString, endDateString);
+            List<Resource> filteredResources = patientDataHandler.getFilteredResources(beginDateString, endDateString, getObservation, getMedication);
             if (getActivity() != null) {
                 getActivity().runOnUiThread(() -> observationMedicationListAdapter.updateData(filteredResources));
             }

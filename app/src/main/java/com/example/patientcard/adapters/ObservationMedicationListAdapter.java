@@ -17,22 +17,18 @@ import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Resource;
 
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Comparator;
-import java.util.Date;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class ObservationMedicationListAdapter extends RecyclerView.Adapter<ObservationMedicationListAdapter.ViewHolder> {
 
     private static final SimpleDateFormat DATE_FORMATTER = new SimpleDateFormat("yyyy-MM-dd");
     private final Context context;
-    private final List<Resource> patientObservationList;
+    private final List<Resource> patientResourceList;
     private ItemClickListener itemClickListener;
 
-    public ObservationMedicationListAdapter(Context context, List<Resource> patientObservationList) {
+    public ObservationMedicationListAdapter(Context context, List<Resource> patientResourceList) {
         this.context = context;
-        this.patientObservationList = patientObservationList;
+        this.patientResourceList = patientResourceList;
     }
 
     @NonNull
@@ -44,7 +40,7 @@ public class ObservationMedicationListAdapter extends RecyclerView.Adapter<Obser
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        Resource resource = patientObservationList.get(position);
+        Resource resource = patientResourceList.get(position);
         String observationDate = StringUtils.EMPTY;
         String observationCode = StringUtils.EMPTY;
         if (resource instanceof Observation) {
@@ -62,13 +58,17 @@ public class ObservationMedicationListAdapter extends RecyclerView.Adapter<Obser
 
     @Override
     public int getItemCount() {
-        return patientObservationList.size();
+        return patientResourceList.size();
     }
 
     public void updateData(List<Resource> newObservationList) {
-        patientObservationList.clear();
-        patientObservationList.addAll(newObservationList);
+        patientResourceList.clear();
+        patientResourceList.addAll(newObservationList);
         notifyDataSetChanged();
+    }
+
+    public Resource getResourceAtPosition(int position) {
+        return patientResourceList.get(position);
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {

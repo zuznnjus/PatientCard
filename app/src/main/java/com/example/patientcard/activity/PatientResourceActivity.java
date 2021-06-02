@@ -8,6 +8,7 @@ import android.widget.TextView;
 
 import com.example.patientcard.R;
 import com.example.patientcard.domain.control.HapiFhirHandler;
+import com.example.patientcard.domain.utils.IntentMessageCodes;
 
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.r4.model.MedicationRequest;
@@ -45,9 +46,9 @@ public class PatientResourceActivity extends AppCompatActivity {
         textViewValue = findViewById(R.id.textViewResourceValueQuantity);
 
         Intent intent = getIntent();
-        Optional<String> observationId = Optional.ofNullable(intent.getStringExtra(PatientActivity.OBSERVATION_ID_MESSAGE));
-        Optional<String> medicationId = Optional.ofNullable(intent.getStringExtra(PatientActivity.MEDICATION_ID_MESSAGE));
-        hapiFhirHandler = (HapiFhirHandler) intent.getSerializableExtra(MainActivity.HAPI_FHIR_HANDLER_MESSAGE);
+        Optional<String> observationId = Optional.ofNullable(intent.getStringExtra(IntentMessageCodes.OBSERVATION_ID_MESSAGE));
+        Optional<String> medicationId = Optional.ofNullable(intent.getStringExtra(IntentMessageCodes.MEDICATION_ID_MESSAGE));
+        hapiFhirHandler = (HapiFhirHandler) intent.getSerializableExtra(IntentMessageCodes.HAPI_FHIR_HANDLER_MESSAGE);
 
         observationId.ifPresent(id -> getResourceThread(id, Observation.class).start());
         medicationId.ifPresent(id -> getResourceThread(id, MedicationRequest.class).start());

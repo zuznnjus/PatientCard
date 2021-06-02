@@ -12,6 +12,7 @@ import android.widget.SearchView;
 import com.example.patientcard.R;
 import com.example.patientcard.adapters.PatientListAdapter;
 import com.example.patientcard.domain.control.HapiFhirHandler;
+import com.example.patientcard.domain.utils.IntentMessageCodes;
 
 import org.hl7.fhir.r4.model.Patient;
 
@@ -21,9 +22,6 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity implements SearchView.OnQueryTextListener, PatientListAdapter.ItemClickListener {
 
     HapiFhirHandler hapiFhirHandler = new HapiFhirHandler();
-
-    public static final String HAPI_FHIR_HANDLER_MESSAGE = "hapiFhirHandlerMessage";
-    public static final String PATIENT_ID_MESSAGE = "patientIdMessage";
     PatientListAdapter patientListAdapter;
 
     @Override
@@ -40,8 +38,8 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
     @Override
     public void onItemClick(View view, int position) {
         Intent intent = new Intent(this, PatientActivity.class);
-        intent.putExtra(PATIENT_ID_MESSAGE, patientListAdapter.getPatientId(position));
-        intent.putExtra(HAPI_FHIR_HANDLER_MESSAGE, hapiFhirHandler);
+        intent.putExtra(IntentMessageCodes.PATIENT_ID_MESSAGE, patientListAdapter.getPatientId(position));
+        intent.putExtra(IntentMessageCodes.HAPI_FHIR_HANDLER_MESSAGE, hapiFhirHandler);
         startActivity(intent);
     }
 

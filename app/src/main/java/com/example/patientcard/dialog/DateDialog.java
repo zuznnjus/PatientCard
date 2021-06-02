@@ -1,4 +1,4 @@
-package com.example.patientcard.activity;
+package com.example.patientcard.dialog;
 
 import android.app.DatePickerDialog;
 import android.content.Context;

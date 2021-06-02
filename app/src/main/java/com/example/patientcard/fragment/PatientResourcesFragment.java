@@ -17,12 +17,11 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.patientcard.R;
-import com.example.patientcard.activity.DateDialog;
-import com.example.patientcard.activity.MainActivity;
-import com.example.patientcard.activity.PatientActivity;
+import com.example.patientcard.dialog.DateDialog;
 import com.example.patientcard.activity.PatientResourceActivity;
 import com.example.patientcard.adapters.ObservationMedicationListAdapter;
 import com.example.patientcard.domain.control.PatientDataHandler;
+import com.example.patientcard.domain.utils.IntentMessageCodes;
 
 import org.hl7.fhir.r4.model.MedicationRequest;
 import org.hl7.fhir.r4.model.Observation;
@@ -77,11 +76,11 @@ public class PatientResourcesFragment extends Fragment implements ObservationMed
         String resourceId = resource.getIdElement().getIdPart();
 
         Intent intent = new Intent(getContext(), PatientResourceActivity.class);
-        intent.putExtra(MainActivity.HAPI_FHIR_HANDLER_MESSAGE, patientDataHandler.getHapiFhirHandler());
+        intent.putExtra(IntentMessageCodes.HAPI_FHIR_HANDLER_MESSAGE, patientDataHandler.getHapiFhirHandler());
         if (resource instanceof Observation) {
-            intent.putExtra(PatientActivity.OBSERVATION_ID_MESSAGE, resourceId);
+            intent.putExtra(IntentMessageCodes.OBSERVATION_ID_MESSAGE, resourceId);
         } else if (resource instanceof MedicationRequest) {
-            intent.putExtra(PatientActivity.MEDICATION_ID_MESSAGE, resourceId);
+            intent.putExtra(IntentMessageCodes.MEDICATION_ID_MESSAGE, resourceId);
         }
         startActivity(intent);
     }

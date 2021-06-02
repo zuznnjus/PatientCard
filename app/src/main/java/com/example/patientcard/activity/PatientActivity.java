@@ -11,6 +11,7 @@ import com.example.patientcard.R;
 import com.example.patientcard.adapters.PatientPagerAdapter;
 import com.example.patientcard.domain.control.HapiFhirHandler;
 import com.example.patientcard.domain.control.PatientDataHandler;
+import com.example.patientcard.domain.utils.IntentMessageCodes;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
 
@@ -18,8 +19,6 @@ import org.hl7.fhir.r4.model.Patient;
 
 public class PatientActivity extends AppCompatActivity {
 
-    public static final String OBSERVATION_ID_MESSAGE = "observationIdMessage";
-    public static final String MEDICATION_ID_MESSAGE = "medicationIdMessage";
     private static final String[] TAB_NAMES = new String[] {"PATIENT", "OBSERVATIONS / MEDICATION REQUESTS"};
     private HapiFhirHandler hapiFhirHandler;
     private PatientDataHandler patientDataHandler;
@@ -30,8 +29,8 @@ public class PatientActivity extends AppCompatActivity {
         setContentView(R.layout.activity_patient);
 
         Intent intent = getIntent();
-        String patientId = intent.getStringExtra(MainActivity.PATIENT_ID_MESSAGE);
-        hapiFhirHandler = (HapiFhirHandler) intent.getSerializableExtra(MainActivity.HAPI_FHIR_HANDLER_MESSAGE);
+        String patientId = intent.getStringExtra(IntentMessageCodes.PATIENT_ID_MESSAGE);
+        hapiFhirHandler = (HapiFhirHandler) intent.getSerializableExtra(IntentMessageCodes.HAPI_FHIR_HANDLER_MESSAGE);
 
         init(patientId);
     }

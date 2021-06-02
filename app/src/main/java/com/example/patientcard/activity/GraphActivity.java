@@ -4,6 +4,8 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.widget.Button;
 import android.widget.EditText;
 
@@ -19,6 +21,7 @@ import com.example.patientcard.domain.control.GraphDataHandler;
 import com.example.patientcard.domain.utils.GraphPoint;
 import com.example.patientcard.domain.utils.IntentMessageCodes;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 
 import java.math.BigDecimal;
@@ -54,11 +57,41 @@ public class GraphActivity extends AppCompatActivity {
         EditText textGraphEnd = findViewById(R.id.editTextGraphEnd);
         beginDate = new DateDialog(this, textGraphBegin);
         endDate = new DateDialog(this, textGraphEnd);
+        textGraphBegin.addTextChangedListener(createTextListener());
+        textGraphEnd.addTextChangedListener(createTextListener());
 
         drawPlot(graphDataHandler.getGraphData());
 
+        Button buttonClearFilters = findViewById(R.id.buttonClearGraphFilters);
+        buttonClearFilters.setOnClickListener(v -> {
+            textGraphBegin.setText(StringUtils.EMPTY);
+            textGraphEnd.setText(StringUtils.EMPTY);
+        });
         Button buttonOk = findViewById(R.id.buttonGraphOk);
         buttonOk.setOnClickListener(v -> finish());
+    }
+
+    private TextWatcher createTextListener() {
+        return new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                new Thread(() -> {
+                    List<GraphPoint> graphPoints =
+                            graphDataHandler.getFilteredGraphData(
+                                    beginDate.getEditText().getText().toString(),
+                                    endDate.getEditText().getText().toString());
+                    runOnUiThread(() -> drawPlot(graphPoints));
+                }).start();
+            }
+        };
     }
 
     private void drawPlot(List<GraphPoint> graphPoints) {
@@ -90,6 +123,7 @@ public class GraphActivity extends AppCompatActivity {
         plot.setDomainBoundaries(minDate, maxDate, BoundaryMode.FIXED);
         plot.getGraph().getLineLabelStyle(XYGraphWidget.Edge.BOTTOM).setFormat(getBottomEdgeFormat());
         plot.getLayoutManager().remove(plot.getLegend());
+        plot.redraw();
     }
 
     private Format getBottomEdgeFormat() {

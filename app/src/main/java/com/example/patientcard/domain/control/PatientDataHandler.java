@@ -1,11 +1,15 @@
 package com.example.patientcard.domain.control;
 
+import com.example.patientcard.domain.utils.GraphPoint;
+
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.r4.model.MedicationRequest;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.Resource;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.ArrayList;
@@ -13,6 +17,8 @@ import java.util.Calendar;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class PatientDataHandler {
@@ -71,6 +77,15 @@ public class PatientDataHandler {
                 .collect(Collectors.toList());
     }
 
+    public List<GraphPoint> getGraphData(String observationCode) {
+        return getObservationsOfCode(observationCode).stream()
+                .map(this::getGraphPoint)
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .collect(Collectors.toList());
+
+    }
+
     private Date getResourceSortingKey(Resource resource) {
         if (resource instanceof Observation) {
             Observation observation = (Observation) resource;
@@ -109,5 +124,30 @@ public class PatientDataHandler {
                     .toLocalDate();
         }
         return convertedDate.isAfter(beginDate) && convertedDate.isBefore(endDate);
+    }
+
+    private List<Observation> getObservationsOfCode(String code) {
+        return patientResources.stream()
+                .filter(Observation.class::isInstance)
+                .map(Observation.class::cast)
+                .filter(observation -> isMatchingCode(code, observation))
+                .collect(Collectors.toList());
+    }
+
+    private boolean isMatchingCode(String code, Observation observation) {
+        return Optional.ofNullable(observation.getCode().getCodingFirstRep().getDisplay())
+                .filter(code::equals)
+                .isPresent();
+    }
+
+    private Optional<GraphPoint> getGraphPoint(Observation observation) {
+        Date date = observation.getIssued();
+        BigDecimal value;
+        Optional<Quantity> quantity = Optional.ofNullable(observation.getValueQuantity());
+        if (quantity.isPresent()) {
+            value = quantity.get().getValue();
+            return Optional.of(new GraphPoint(date, value));
+        }
+        return Optional.empty();
     }
 }

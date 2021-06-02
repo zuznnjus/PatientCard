@@ -7,6 +7,7 @@ import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 
@@ -20,6 +21,7 @@ import com.example.patientcard.R;
 import com.example.patientcard.dialog.DateDialog;
 import com.example.patientcard.activity.PatientResourceActivity;
 import com.example.patientcard.adapters.ObservationMedicationListAdapter;
+import com.example.patientcard.dialog.GraphDialog;
 import com.example.patientcard.domain.control.PatientDataHandler;
 import com.example.patientcard.domain.utils.IntentMessageCodes;
 
@@ -35,6 +37,7 @@ public class PatientResourcesFragment extends Fragment implements ObservationMed
     private final PatientDataHandler patientDataHandler;
     private DateDialog beginDate;
     private DateDialog endDate;
+    private GraphDialog graphDialog;
     private CheckBox checkBoxObservation;
     private CheckBox checkBoxMedication;
     private ObservationMedicationListAdapter observationMedicationListAdapter;
@@ -59,6 +62,10 @@ public class PatientResourcesFragment extends Fragment implements ObservationMed
         endDate = new DateDialog(view.getContext(), editEndDate);
         editStartDate.addTextChangedListener(createTextListener());
         editEndDate.addTextChangedListener(createTextListener());
+
+        graphDialog = new GraphDialog(view.getContext(), patientDataHandler);
+        Button buttonGraph = view.findViewById(R.id.buttonGraph);
+        buttonGraph.setOnClickListener(v -> graphDialog.show());
 
         checkBoxObservation = view.findViewById(R.id.checkBoxObservation);
         checkBoxMedication = view.findViewById(R.id.checkBoxMedication);

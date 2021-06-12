@@ -1,11 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
     android:padding="10dp"
-    tools:context=".activity.PatientResourceActivity">
+    android:orientation="vertical">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -17,11 +15,11 @@
             android:layout_height="wrap_content"
             android:layout_weight="2"
             android:padding="5dp"
-            android:text="Id:"
+            android:text="Identifier:"
             android:textSize="15sp" />
 
         <TextView
-            android:id="@+id/textViewResourceId"
+            android:id="@+id/textViewPatientVersionIdentifier"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -41,11 +39,11 @@
             android:layout_height="wrap_content"
             android:layout_weight="2"
             android:padding="5dp"
-            android:text="Type:"
+            android:text="Name:"
             android:textSize="15sp" />
 
         <TextView
-            android:id="@+id/textViewResourceType"
+            android:id="@+id/textViewPatientVersionName"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -65,11 +63,11 @@
             android:layout_height="wrap_content"
             android:layout_weight="2"
             android:padding="5dp"
-            android:text="Code:"
+            android:text="Gender:"
             android:textSize="15sp" />
 
         <TextView
-            android:id="@+id/textViewResourceCode"
+            android:id="@+id/textViewPatientVersionGender"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -89,11 +87,11 @@
             android:layout_height="wrap_content"
             android:layout_weight="2"
             android:padding="5dp"
-            android:text="Date:"
+            android:text="Birth date:"
             android:textSize="15sp" />
 
         <TextView
-            android:id="@+id/textViewResourceDate"
+            android:id="@+id/textViewPatientVersionBirthDate"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -113,11 +111,35 @@
             android:layout_height="wrap_content"
             android:layout_weight="2"
             android:padding="5dp"
-            android:text="Measurement value:"
+            android:text="Contact:"
             android:textSize="15sp" />
 
         <TextView
-            android:id="@+id/textViewResourceValueQuantity"
+            android:id="@+id/editTextPatientVersionContact"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:padding="5dp"
+            android:text=""
+            android:textSize="15sp"/>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="2"
+            android:padding="5dp"
+            android:text="Address:"
+            android:textSize="15sp" />
+
+        <TextView
+            android:id="@+id/editTextPatientVersionAddressLine"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -134,37 +156,51 @@
 
         <TextView
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:layout_weight="2"
             android:padding="5dp"
-            android:text="Note:"
+            android:text="City:"
             android:textSize="15sp" />
 
-        <com.google.android.material.textfield.TextInputLayout
+        <TextView
+            android:id="@+id/editTextPatientVersionAddressCity"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1">
+            android:layout_weight="1"
+            android:padding="5dp"
+            android:text=""
+            android:textSize="15sp"/>
 
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/textInputNote"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
-        </com.google.android.material.textfield.TextInputLayout>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="2"
+            android:padding="5dp"
+            android:text="Country:"
+            android:textSize="15sp" />
+
+        <TextView
+            android:id="@+id/editTextPatientVersionAddressCountry"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:padding="5dp"
+            android:text=""
+            android:textSize="15sp"/>
 
     </LinearLayout>
 
     <Button
-        android:id="@+id/buttonUpdatePatientResource"
+        android:id="@+id/buttonPatientVersionOk"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="update"
-        android:visibility="invisible"/>
-
-    <Button
-        android:id="@+id/buttonShowResourceHistory"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="show history"/>
-
+        android:text="OK" />
 
 </LinearLayout>

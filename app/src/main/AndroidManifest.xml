@@ -13,7 +13,10 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.PatientCard"
         android:usesCleartextTraffic="true">
-        <activity android:name=".activity.GraphActivity"/>
+        <activity android:name=".activity.ResourceVersionActivity"></activity>
+        <activity android:name=".activity.PatientVersionActivity" />
+        <activity android:name=".activity.ResourceHistoryActivity" />
+        <activity android:name=".activity.GraphActivity" />
         <activity android:name=".activity.PatientResourceActivity" />
         <activity android:name=".activity.PatientActivity" />
         <activity android:name=".activity.MainActivity">

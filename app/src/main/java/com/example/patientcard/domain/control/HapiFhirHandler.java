@@ -92,6 +92,36 @@ public class HapiFhirHandler implements Serializable {
                 .execute();
     }
 
+    public Resource getResourceByUrl(String resourceUrl, Class<? extends Resource> type) {
+        return RestClient.getGenericClient()
+                .read()
+                .resource(type)
+                .withUrl(resourceUrl)
+                .execute();
+    }
+
+    public void updateResource(Resource resource) {
+        RestClient.getGenericClient()
+                .update()
+                .resource(resource)
+                .execute();
+    }
+
+    public List<Resource> getResourceHistory(String url, Class<? extends Resource> type) {
+        Bundle bundle = RestClient.getGenericClient()
+                .search()
+                .byUrl(url)
+                .encodedJson()
+                .returnBundle(Bundle.class)
+                .execute();
+        return getPagedEntries(bundle).stream()
+                .map(Bundle.BundleEntryComponent::getResource)
+                .filter(type::isInstance)
+                .map(type::cast)
+                .sorted(Comparator.comparing(this::getResourceVersionSortingKey).reversed())
+                .collect(Collectors.toList());
+    }
+
     private List<Bundle.BundleEntryComponent> getPagedEntries(Bundle bundle) {
         List<Bundle.BundleEntryComponent> entries = bundle.getEntry();
         while (bundle.getLink(Bundle.LINK_NEXT) != null) {
@@ -102,5 +132,9 @@ public class HapiFhirHandler implements Serializable {
             entries.addAll(bundle.getEntry());
         }
         return entries;
+    }
+
+    private String getResourceVersionSortingKey(Resource resource) {
+        return resource.getMeta().getVersionId();
     }
 }
